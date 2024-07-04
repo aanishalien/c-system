@@ -1,0 +1,3 @@
+﻿SELECt * FROM salary;
+
+
