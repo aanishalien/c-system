@@ -291,6 +291,7 @@
             this.textBox10.Name = "textBox10";
             this.textBox10.Size = new System.Drawing.Size(144, 20);
             this.textBox10.TabIndex = 1;
+            this.textBox10.TextChanged += new System.EventHandler(this.TextBox10_TextChanged);
             // 
             // emp_image
             // 

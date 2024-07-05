@@ -36,7 +36,7 @@ namespace GriffdanManagementsystem
         {
             try
             {
-                using (SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM salary", cnn))
+                using (SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM salaries", cnn))
                 {
                     DataTable dataTable = new DataTable();
                     adapter.Fill(dataTable);
@@ -53,7 +53,7 @@ namespace GriffdanManagementsystem
         {
             try
             {
-                using (SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM salary", cnn))
+                using (SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM Employee", cnn))
                 {
                     DataTable dataTable = new DataTable();
                     adapter.Fill(dataTable);
@@ -113,7 +113,7 @@ namespace GriffdanManagementsystem
 
         private void Salary_Load(object sender, EventArgs e)
         {
-            string sql = "SELECT * FROM employee";
+            string sql = "SELECT * FROM Employee";
             cmd = new SqlCommand(sql, cnn);
             cnn.Open();
             dr = cmd.ExecuteReader();
@@ -130,20 +130,25 @@ namespace GriffdanManagementsystem
 
         private void Cmbemid_SelectedIndexChanged(object sender, EventArgs e)
         {
-            cmd = new SqlCommand("SELECT * FROM Employee WHERE employee_id=@employeeid",cnn);
-            cmd.Parameters.AddWithValue("@employeeid",cmbemid.Text);
-            cnn.Open();
-            dr = cmd.ExecuteReader();
-            while(dr.Read())
+            if (cnn.State == ConnectionState.Closed)
             {
-                string basicsalary = dr["basic_salary"].ToString();
-                string overtimerate = dr["over_time_rate"].ToString();
-                string allowance = dr["allowance"].ToString();
-
-                emp_basicsalary.Text = basicsalary;
-                emp_overtimerate.Text = overtimerate;
-                emp_allowance.Text = allowance;
+                cnn.Open();
             }
+
+            cmd = new SqlCommand("SELECT * FROM Employee WHERE employee_id=@employeeid", cnn);
+            cmd.Parameters.AddWithValue("@employeeid", cmbemid.Text);
+
+            dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                emp_name.Text = dr["full_name"].ToString();
+                emp_basicsalary.Text = dr["basic_salary"].ToString();
+                emp_overtimerate.Text = dr["over_time_rate"].ToString();
+                emp_allowance.Text = dr["allowance"].ToString();
+            }
+
+            dr.Close(); // Close the DataReader after using it
+            cnn.Close();
         }
 
         private void GroupBox1_Enter(object sender, EventArgs e)
@@ -181,25 +186,68 @@ namespace GriffdanManagementsystem
 
         private void Calculate_Click(object sender, EventArgs e)
         {
-            // Create an instance of the Salary class
-            decimal basic_salary = Convert.ToDecimal(emp_basicsalary.Text);
-            decimal allowance = Convert.ToDecimal(emp_allowance.Text);
-            decimal OvertimeHours = Convert.ToDecimal(overtimehours.Text);
-            decimal over_time_rate = Convert.ToDecimal(emp_overtimerate.Text);
-            decimal SalaryCycleDays = Convert.ToDecimal(sett_salarycycledays.Text);
-            decimal NumberOfLeaves = Convert.ToDecimal(numberofleaves.Text);
-            decimal NumberOfAbsent = Convert.ToDecimal(numberofabsent.Text);
-            decimal GovernementTax = Convert.ToDecimal(emp_allowance.Text);
-            decimal NoPayValue = Nopayvalue(basic_salary, allowance, NumberOfAbsent);
-            decimal BasePay = BasePayValue(basic_salary, allowance, over_time_rate, OvertimeHours);
-            decimal GrossPay = Grosspayvalue(BasePay, NoPayValue, GovernementTax);
-            decimal MonthlySalary = CalculateMonthlySalary(GrossPay, NoPayValue, GovernementTax);
+            // Ensure that all required text boxes contain valid decimal values
+            if (!decimal.TryParse(emp_basicsalary.Text, out decimal basic_salary))
+            {
+                MessageBox.Show("Invalid Basic Salary value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            basepayvalue.Text = GrossPay.ToString("0.00");
+            if (!decimal.TryParse(emp_allowance.Text, out decimal allowance))
+            {
+                MessageBox.Show("Invalid Allowance value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!decimal.TryParse(overtimehours.Text, out decimal OvertimeHours))
+            {
+                MessageBox.Show("Invalid Overtime Hours value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!decimal.TryParse(emp_overtimerate.Text, out decimal overtimerate))
+            {
+                MessageBox.Show("Invalid Overtime Rate value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!decimal.TryParse(sett_salarycycledays.Text, out decimal SalaryCycleDays))
+            {
+                MessageBox.Show("Invalid Salary Cycle Days value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!decimal.TryParse(numberofleaves.Text, out decimal NumberOfLeaves))
+            {
+                MessageBox.Show("Invalid Number of Leaves value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!decimal.TryParse(numberofabsent.Text, out decimal NumberOfAbsent))
+            {
+                MessageBox.Show("Invalid Number of Absent Days value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!decimal.TryParse(sett_governmenttax.Text, out decimal GovernmentTax))
+            {
+                MessageBox.Show("Invalid Government Tax value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Calculate the various salary components
+            decimal NoPayValue = Nopayvalue(basic_salary, SalaryCycleDays, NumberOfAbsent);
+            decimal BasePay = BasePayValue(basic_salary, allowance, overtimerate, OvertimeHours);
+            decimal GrossPay = Grosspayvalue(BasePay, NoPayValue, GovernmentTax);
+            decimal MonthlySalary = CalculateMonthlySalary(GrossPay, NoPayValue, GovernmentTax);
+
+            // Display the calculated values
+            basepayvalue.Text = BasePay.ToString("0.00");
             nopayvalue.Text = NoPayValue.ToString("0.00");
             grosspayvalue.Text = GrossPay.ToString("0.00");
             Monthlysalary.Text = MonthlySalary.ToString("0.00");
         }
+
 
         static string points(string x)
         {
@@ -369,74 +417,84 @@ namespace GriffdanManagementsystem
 
         private void Insert_Click(object sender, EventArgs e)
         {
-            if (cmbemid.Text == ""
-                || emp_basicsalary.Text == ""
-                || emp_overtimerate.Text == ""
-                || emp_allowance.Text == ""
-                || remaingleaves.Text == ""
-                || numberofleaves.Text == ""
-                || numberofabsent.Text == ""
-                || numberofholidays.Text == ""
-                || overtimehours.Text == ""
-                || basepayvalue.Text == ""
-                || grosspayvalue.Text == ""
-                || nopayvalue.Text == "")
+            
+        }
+
+        private void Insert_btn_Click(object sender, EventArgs e)
+        {
+
+            if (string.IsNullOrWhiteSpace(cmbemid.Text) ||
+               string.IsNullOrWhiteSpace(emp_name.Text)||
+               string.IsNullOrWhiteSpace(emp_basicsalary.Text) ||
+               string.IsNullOrWhiteSpace(emp_overtimerate.Text) ||
+               string.IsNullOrWhiteSpace(emp_allowance.Text) ||
+               string.IsNullOrWhiteSpace(remaingleaves.Text) ||
+               string.IsNullOrWhiteSpace(numberofleaves.Text) ||
+               string.IsNullOrWhiteSpace(numberofabsent.Text) ||
+               string.IsNullOrWhiteSpace(sett_salarycycledays.Text) ||
+               string.IsNullOrWhiteSpace(sett_governmenttax.Text) ||
+               string.IsNullOrWhiteSpace(nopayvalue.Text) ||
+               string.IsNullOrWhiteSpace(basepayvalue.Text) ||
+               string.IsNullOrWhiteSpace(grosspayvalue.Text) ||
+               string.IsNullOrWhiteSpace(Monthlysalary.Text))
             {
-                MessageBox.Show("Please fill in the blank fields", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("All fields must be filled out", "Input Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
-            else
+
+            try
             {
-                if (cnn.State == ConnectionState.Closed)
+                using (SqlConnection cnn = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Gadget Fix\Documents\griffonDb.mdf;Integrated Security=True;Connect Timeout=30"))
                 {
-                    try
+                    using (SqlCommand cmd = new SqlCommand("INSERT INTO salaries (employee_id, employee_name,basic_salary, overtimerate, allowance, RemainingLeaves, Numberofleaves, Numberofabsent, SalaryCycleDays, GovernmentTax, NoPayValue, BasePay, GrossPay, monthly_salary,OvertimeHours) " +
+                        "VALUES (@employee_id,@employee_name, @basic_salary, @over_time_rate, @allowance, @remaining_leaves, @number_of_leaves, @number_of_absent, @salary_cycle_days, @government_tax, @no_pay_value, @base_pay_value, @gross_pay_value, @monthly_salary,@overtimehours)", cnn))
                     {
+                        cmd.Parameters.AddWithValue("@employee_id", cmbemid.Text);
+                        cmd.Parameters.AddWithValue("@employee_name", emp_name.Text);
+                        cmd.Parameters.AddWithValue("@basic_salary", decimal.Parse(emp_basicsalary.Text));
+                        cmd.Parameters.AddWithValue("@over_time_rate", decimal.Parse(emp_overtimerate.Text));
+                        cmd.Parameters.AddWithValue("@allowance", decimal.Parse(emp_allowance.Text));
+                        cmd.Parameters.AddWithValue("@remaining_leaves", int.Parse(remaingleaves.Text));
+                        cmd.Parameters.AddWithValue("@number_of_leaves", int.Parse(numberofleaves.Text));
+                        cmd.Parameters.AddWithValue("@number_of_absent", int.Parse(numberofabsent.Text));
+                        cmd.Parameters.AddWithValue("@overtimehours", int.Parse(overtimehours.Text));
+                        cmd.Parameters.AddWithValue("@salary_cycle_days", int.Parse(sett_salarycycledays.Text));
+                        cmd.Parameters.AddWithValue("@government_tax", decimal.Parse(sett_governmenttax.Text));
+                        cmd.Parameters.AddWithValue("@no_pay_value", decimal.Parse(nopayvalue.Text));
+                        cmd.Parameters.AddWithValue("@base_pay_value", decimal.Parse(basepayvalue.Text));
+                        cmd.Parameters.AddWithValue("@gross_pay_value", decimal.Parse(grosspayvalue.Text));
+                        cmd.Parameters.AddWithValue("@monthly_salary", decimal.Parse(Monthlysalary.Text));
+
                         cnn.Open();
-                        string checkemployeeID = "SELECT COUNT(*) FROM salary WHERE employee_id = @employeeID"; // Assuming employee_id is the primary key
-
-                        using (SqlCommand checkEmployee = new SqlCommand(checkemployeeID, cnn))
-                        {
-                            checkEmployee.Parameters.AddWithValue("@employeeID", cmbemid.Text.Trim());
-                            int count = (int)checkEmployee.ExecuteScalar();
-
-                            if (count >= 1)
-                            {
-                                MessageBox.Show(cmbemid.Text.Trim() + " is already taken", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-                            else
-                            {
-                                string insertData = "INSERT INTO salary (NumberOfLeaves, NumberOfAbsent, NumberOfHolidays, OvertimeHours, BasePay, GrossPay, NoPayValue) " +
-                                                    "VALUES (@numberofleaves, @numberofabsent, @numberofholidays, @overtimehours, @basepay, @grosspay, @nopayvalue)";
-
-                                using (SqlCommand cmd = new SqlCommand(insertData, cnn))
-                                {
-                                    cmd.Parameters.AddWithValue("@numberofleaves", numberofleaves.Text.Trim());
-                                    cmd.Parameters.AddWithValue("@numberofabsent", numberofabsent.Text.Trim());
-                                    cmd.Parameters.AddWithValue("@numberofholidays", numberofholidays.Text.Trim());
-                                    cmd.Parameters.AddWithValue("@overtimehours", overtimehours.Text.Trim());
-                                    cmd.Parameters.AddWithValue("@basepay", basepayvalue.Text.Trim());
-                                    cmd.Parameters.AddWithValue("@grosspay", grosspayvalue.Text.Trim());
-                                    cmd.Parameters.AddWithValue("@nopayvalue", nopayvalue.Text.Trim());
-
-                                    cmd.ExecuteNonQuery();
-
-                                    displaySalaryData();
-
-                                    MessageBox.Show("Added Successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    finally
-                    {
-                        cnn.Close();
+                        cmd.ExecuteNonQuery();
                     }
                 }
+
+                MessageBox.Show("Data inserted successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        private void Clear_btn_Click(object sender, EventArgs e)
+        {
+            cmbemid.Text = string.Empty;
+            emp_name.Text = string.Empty;
+            emp_basicsalary.Text = string.Empty;
+            emp_overtimerate.Text = string.Empty;
+            emp_allowance.Text = string.Empty;
+            overtimehours.Text = string.Empty;
+            sett_salarycycledays.Text = string.Empty;
+            numberofleaves.Text = string.Empty;
+            numberofabsent.Text = string.Empty;
+            sett_governmenttax.Text = string.Empty;
+            basepayvalue.Text = string.Empty;
+            nopayvalue.Text = string.Empty;
+            grosspayvalue.Text = string.Empty;
+            Monthlysalary.Text = string.Empty;
+            cmbemid.SelectedIndex = -1;
+        }
     }
 }

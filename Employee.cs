@@ -271,5 +271,10 @@ namespace GriffdanManagementsystem
         {
 
         }
+
+        private void TextBox10_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

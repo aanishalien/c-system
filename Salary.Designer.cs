@@ -66,9 +66,12 @@
             this.label16 = new System.Windows.Forms.Label();
             this.sett_numberofleaves = new System.Windows.Forms.TextBox();
             this.label17 = new System.Windows.Forms.Label();
-            this.Insert = new System.Windows.Forms.Button();
             this.label18 = new System.Windows.Forms.Label();
             this.Monthlysalary = new System.Windows.Forms.TextBox();
+            this.insert_btn = new System.Windows.Forms.Button();
+            this.clear_btn = new System.Windows.Forms.Button();
+            this.label19 = new System.Windows.Forms.Label();
+            this.emp_name = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -78,10 +81,12 @@
             this.groupBox1.Controls.Add(this.label13);
             this.groupBox1.Controls.Add(this.emp_overtimerate);
             this.groupBox1.Controls.Add(this.emp_allowance);
+            this.groupBox1.Controls.Add(this.label19);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.label12);
             this.groupBox1.Controls.Add(this.remaingleaves);
             this.groupBox1.Controls.Add(this.label9);
+            this.groupBox1.Controls.Add(this.emp_name);
             this.groupBox1.Controls.Add(this.emp_basicsalary);
             this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.ForeColor = System.Drawing.Color.White;
@@ -96,7 +101,7 @@
             // cmbemid
             // 
             this.cmbemid.FormattingEnabled = true;
-            this.cmbemid.Location = new System.Drawing.Point(119, 68);
+            this.cmbemid.Location = new System.Drawing.Point(119, 34);
             this.cmbemid.Name = "cmbemid";
             this.cmbemid.Size = new System.Drawing.Size(239, 21);
             this.cmbemid.TabIndex = 18;
@@ -130,7 +135,7 @@
             // 
             this.label8.AutoSize = true;
             this.label8.ForeColor = System.Drawing.Color.White;
-            this.label8.Location = new System.Drawing.Point(11, 71);
+            this.label8.Location = new System.Drawing.Point(11, 37);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(65, 13);
             this.label8.TabIndex = 14;
@@ -290,7 +295,7 @@
             this.calculate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.calculate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.calculate.ForeColor = System.Drawing.Color.White;
-            this.calculate.Location = new System.Drawing.Point(308, 513);
+            this.calculate.Location = new System.Drawing.Point(56, 487);
             this.calculate.Name = "calculate";
             this.calculate.Size = new System.Drawing.Size(75, 23);
             this.calculate.TabIndex = 18;
@@ -429,18 +434,6 @@
             this.label17.TabIndex = 25;
             this.label17.Text = "Leaves Per Year";
             // 
-            // Insert
-            // 
-            this.Insert.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Insert.ForeColor = System.Drawing.Color.White;
-            this.Insert.Location = new System.Drawing.Point(510, 486);
-            this.Insert.Name = "Insert";
-            this.Insert.Size = new System.Drawing.Size(91, 31);
-            this.Insert.TabIndex = 27;
-            this.Insert.Text = "insert";
-            this.Insert.UseVisualStyleBackColor = true;
-            this.Insert.Click += new System.EventHandler(this.Insert_Click);
-            // 
             // label18
             // 
             this.label18.AutoSize = true;
@@ -458,13 +451,55 @@
             this.Monthlysalary.Size = new System.Drawing.Size(226, 20);
             this.Monthlysalary.TabIndex = 15;
             // 
+            // insert_btn
+            // 
+            this.insert_btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.insert_btn.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.insert_btn.Location = new System.Drawing.Point(399, 487);
+            this.insert_btn.Name = "insert_btn";
+            this.insert_btn.Size = new System.Drawing.Size(81, 31);
+            this.insert_btn.TabIndex = 28;
+            this.insert_btn.Text = "Insert";
+            this.insert_btn.UseVisualStyleBackColor = true;
+            this.insert_btn.Click += new System.EventHandler(this.Insert_btn_Click);
+            // 
+            // clear_btn
+            // 
+            this.clear_btn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.clear_btn.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.clear_btn.Location = new System.Drawing.Point(634, 487);
+            this.clear_btn.Name = "clear_btn";
+            this.clear_btn.Size = new System.Drawing.Size(93, 31);
+            this.clear_btn.TabIndex = 29;
+            this.clear_btn.Text = "Clear";
+            this.clear_btn.UseVisualStyleBackColor = true;
+            this.clear_btn.Click += new System.EventHandler(this.Clear_btn_Click);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.ForeColor = System.Drawing.Color.White;
+            this.label19.Location = new System.Drawing.Point(11, 75);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(84, 13);
+            this.label19.TabIndex = 14;
+            this.label19.Text = "Employee Name";
+            // 
+            // emp_name
+            // 
+            this.emp_name.Location = new System.Drawing.Point(117, 72);
+            this.emp_name.Name = "emp_name";
+            this.emp_name.Size = new System.Drawing.Size(239, 20);
+            this.emp_name.TabIndex = 16;
+            // 
             // Salary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(765, 548);
-            this.Controls.Add(this.Insert);
+            this.Controls.Add(this.clear_btn);
+            this.Controls.Add(this.insert_btn);
             this.Controls.Add(this.sett_numberofleaves);
             this.Controls.Add(this.label17);
             this.Controls.Add(this.sett_salarybegindate);
@@ -547,8 +582,11 @@
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.TextBox sett_numberofleaves;
         private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.Button Insert;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.TextBox Monthlysalary;
+        private System.Windows.Forms.Button insert_btn;
+        private System.Windows.Forms.Button clear_btn;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.TextBox emp_name;
     }
 }
